@@ -14,7 +14,9 @@ def price_snapshot(snapshot_date):
         SELECT
             oc.Ticker, oc.Expiry, oc.OptionType, oc.Strike,
             oc.LastPrice, oc.Bid, oc.Ask, oc.ImpliedVolatility,
-            us.SpotPrice, rfr.Rate
+            us.SpotPrice,
+            COALESCE(us.DividendYield, 0.0) AS DividendYield,
+            rfr.Rate
         FROM OptionsChain oc
         JOIN UnderlyingSnapshot us
             ON oc.Ticker = us.Ticker AND oc.SnapshotDate = us.SnapshotDate
@@ -42,7 +44,8 @@ def price_snapshot(snapshot_date):
             row["T"],
             row["Rate"],
             row["ImpliedVolatility"],
-            row["OptionType"]
+            row["OptionType"],
+            q=row["DividendYield"]
         ),
         axis=1
     )
