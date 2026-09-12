@@ -20,12 +20,12 @@ def already_snapshotted(cursor, ticker, snapshot_date):
     return cursor.fetchone()[0] > 0
 
 
-def insert_underlying_snapshot(cursor, ticker, snapshot_date, spot_price):
+def insert_underlying_snapshot(cursor, ticker, snapshot_date, spot_price, dividend_yield):
     cursor.execute("""
         INSERT INTO UnderlyingSnapshot
-            (Ticker, SnapshotDate, SpotPrice)
-        VALUES (?, ?, ?)
-    """, ticker, snapshot_date, spot_price)
+            (Ticker, SnapshotDate, SpotPrice, DividendYield)
+        VALUES (?, ?, ?, ?)
+    """, ticker, snapshot_date, spot_price, dividend_yield)
 
 
 def insert_risk_free_rate(cursor, snapshot_date, rate):
