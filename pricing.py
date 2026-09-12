@@ -2,55 +2,17 @@ import numpy as np
 from scipy.stats import norm
 
 
-def bs_price(
-    S,
-    K,
-    T,
-    r,
-    sigma,
-    option_type="CALL"
-):
-    """European option price under Black-Scholes.
-
-    S: spot price
-    K: strike price
-    T: time to maturity in years
-    r: annualized risk-free rate
-    sigma: annualized volatility
-    """
-
-    d1 = (
-        np.log(S / K)
-        + (r + 0.5 * sigma**2) * T
-    ) / (
-        sigma * np.sqrt(T)
-    )
-
+def bs_price(S, K, T, r, sigma, option_type="CALL", q=0.0):
+    """q=0 verirsen düz Black-Scholes'e döner."""
+    d1 = (np.log(S / K) + (r - q + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
     d2 = d1 - sigma * np.sqrt(T)
 
     if option_type == "CALL":
-
-        return (
-            S * norm.cdf(d1)
-            - K
-            * np.exp(-r * T)
-            * norm.cdf(d2)
-        )
-
+        return S * np.exp(-q * T) * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
     elif option_type == "PUT":
-
-        return (
-            K
-            * np.exp(-r * T)
-            * norm.cdf(-d2)
-            - S
-            * norm.cdf(-d1)
-        )
-
+        return K * np.exp(-r * T) * norm.cdf(-d2) - S * np.exp(-q * T) * norm.cdf(-d1)
     else:
-        raise ValueError(
-            "option_type must be 'CALL' or 'PUT'"
-        )
+        raise ValueError("option_type must be 'CALL' or 'PUT'")
 
 
 def mc_price(
@@ -61,7 +23,8 @@ def mc_price(
     sigma,
     option_type="CALL",
     n_paths=100_000,
-    seed=42
+    seed=42,
+    q=0.0
 ):
     """Monte Carlo price under risk-neutral GBM.
 
@@ -72,10 +35,7 @@ def mc_price(
 
     Z = rng.standard_normal(n_paths)
 
-    S_T = S * np.exp(
-        (r - 0.5 * sigma**2) * T
-        + sigma * np.sqrt(T) * Z
-    )
+    S_T = S * np.exp((r - q - 0.5 * sigma**2) * T + sigma * np.sqrt(T) * Z)
 
     if option_type == "CALL":
 
