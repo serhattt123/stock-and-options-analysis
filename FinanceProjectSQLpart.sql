@@ -2,6 +2,7 @@ CREATE TABLE UnderlyingSnapshot (
     Ticker       VARCHAR(10)   NOT NULL,
     SnapshotDate DATE          NOT NULL,
     SpotPrice    DECIMAL(10,4) NOT NULL,
+    DividendYield DECIMAL(6,4) NOT NULL,
     CONSTRAINT PK_UnderlyingSnapshot PRIMARY KEY (Ticker, SnapshotDate)
 );
 
