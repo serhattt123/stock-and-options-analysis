@@ -62,6 +62,7 @@ def clean_chain(df):
         (df["bid"] > 0)
         & (df["ask"] > 0)
         & (df["bid"] <= df["ask"])
+        & (df["impliedVolatility"] > 0)
     )
 
     dropped = len(df) - valid.sum()
@@ -127,7 +128,8 @@ def build_options_snapshot():
             cursor,
             ticker,
             snapshot_date,
-            spot
+            spot,
+            get_dividend_yield(ticker)
         )
 
         # Select near and far expiries
@@ -164,3 +166,11 @@ def build_options_snapshot():
 
     cursor.close()
     conn.close()
+
+
+def get_dividend_yield(ticker):
+    """yfinance dividendYield alanını doğrudan yüzde sayısı (%0.44 -> 0.44)
+    olarak döndürüyor, formülün beklediği ondalık kesre (0.0044) çeviriyoruz."""
+    info = yf.Ticker(ticker).info
+    raw = info.get("dividendYield", 0.0) or 0.0
+    return round(raw / 100, 4)
