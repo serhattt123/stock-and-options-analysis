@@ -2,7 +2,6 @@ import numpy as np
 from scipy.stats import norm
 
 
-
 def bs_price(S, K, T, r, sigma, option_type="CALL", q=0.0):
     """q=0 verirsen düz Black-Scholes'e döner."""
     d1 = (np.log(S / K) + (r - q + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
