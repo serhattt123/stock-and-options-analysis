@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import yfinance as yf
 
@@ -55,11 +56,27 @@ def clean_chain(df):
 
     df = df.copy()
 
-    # No trades today does not mean invalid contract.
+    numeric_columns = [
+        "strike", "lastPrice", "bid", "ask", "volume",
+        "openInterest", "impliedVolatility"
+    ]
+
+    # SQL Server rejects NaN and +/-infinity for FLOAT columns.  Market data
+    # occasionally contains infinity for implied volatility, which passes a
+    # simple ``> 0`` test but cannot be inserted through pyodbc.
+    df[numeric_columns] = df[numeric_columns].apply(
+        pd.to_numeric, errors="coerce"
+    )
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+    # No trades today do not mean the contract is invalid.
     df["volume"] = df["volume"].fillna(0)
+    df["openInterest"] = df["openInterest"].fillna(0)
 
     valid = (
-        (df["bid"] > 0)
+        df["strike"].notna()
+        & df["lastPrice"].notna()
+        & (df["bid"] > 0)
         & (df["ask"] > 0)
         & (df["bid"] <= df["ask"])
         & (df["impliedVolatility"] > 0)
@@ -96,7 +113,7 @@ def build_options_snapshot():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Get current risk-free rate
+    # Get the current risk-free rate.
     r = get_risk_free_rate()
 
     insert_risk_free_rate(
@@ -117,7 +134,7 @@ def build_options_snapshot():
             )
             continue
 
-        # Current stock price
+        # Get the current stock price.
         spot = (
             yf.Ticker(ticker)
             .history(period="1d")["Close"]
@@ -132,7 +149,7 @@ def build_options_snapshot():
             get_dividend_yield(ticker)
         )
 
-        # Select near and far expiries
+        # Select near- and far-dated expiries.
         near_expiry, far_expiry = pick_expiries(ticker)
 
         for expiry in (
@@ -174,3 +191,4 @@ def get_dividend_yield(ticker):
     info = yf.Ticker(ticker).info
     raw = info.get("dividendYield", 0.0) or 0.0
     return round(raw / 100, 4)
+
