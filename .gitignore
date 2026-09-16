@@ -1,0 +1,84 @@
+# Python
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables and secrets
+
+.env
+.env.*
+!.env.example
+
+# Database / local data
+
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+*.mdf
+*.ndf
+*.ldf
+
+# Local configuration
+
+config.local.py
+
+# IDE / Editor
+
+.vscode/
+.idea/
+
+# Jupyter Notebook
+
+.ipynb_checkpoints/
+
+# OS generated files
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+
+*.log
+
+# Temporary files
+
+*.tmp
+*.temp
+
+# Generated outputs
+
+output/
+outputs/
+results/
+plots/
+
+# Python build files
+
+build/
+dist/
+*.egg-info/
+
+# Testing / coverage
+
+.pytest_cache/
+.coverage
+htmlcov/
+.coverage.*
+
+# Secrets / credentials
+
+credentials.json
+secrets.json
+token.json
+*.pem
+*.key
