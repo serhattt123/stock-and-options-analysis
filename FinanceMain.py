@@ -3,6 +3,7 @@ import pandas as pd
 from data_layer import build_options_snapshot
 from db_utils import get_connection
 from pricing import bs_price, mc_price, no_arbitrage_lower_bound, calculate_greeks
+from visualization import plot_volatility_smile, plot_greek_curve, plot_payoff
 
 
 def price_snapshot(snapshot_date):
@@ -171,13 +172,12 @@ def main():
     print(f"Median Error        : {stats['50%']:.2f}%")
     print(f"75th Percentile     : {stats['75%']:.2f}%")
 
-
-    # Worst contract
-    worst_idx = df["price_diff"].abs().idxmax()
+    # Worst contract: largest error relative to the market mid price.
+    worst_idx = df["pct_diff"].abs().idxmax()
     worst = df.loc[worst_idx]
 
     print("\n" + "=" * 60)
-    print("WORST PRICING DIFFERENCE")
+    print("WORST PERCENTAGE PRICING ERROR")
     print("=" * 60)
 
     print(f"Ticker              : {worst['Ticker']}")
@@ -197,6 +197,14 @@ def main():
     print("ANALYSIS COMPLETED")
     print("=" * 60)
 
+    expiry = df["Expiry"].unique()[0]
+    plot_volatility_smile(df, "AAPL", expiry, "PUT")
+    plot_greek_curve(df, "AAPL", expiry, "PUT", greek="delta")
+    plot_payoff(df.loc[worst_idx])
+
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()
